@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CidadãoSeguro - Denúncia Anônima</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="showView('home')">
+            <div class="logo-icon"><i data-lucide="shield" size="18"></i></div>
+            <span>CidadãoSeguro</span>
+        </div>
+        <button class="panic-btn" onclick="quickExit()">
+            <i data-lucide="zap" size="14"></i> SAIR AGORA (ESC)
+        </button>
+    </header>
+
+    <main>
+        <!-- HOME VIEW -->
+        <section id="view-home" class="view active fade-in">
+            <div class="home-hero">
+                <h1>Canal de Denúncia <span>Sigiloso</span></h1>
+                <p>Relate atos de violência ou irregularidades com anonimato absoluto e segurança digital.</p>
+            </div>
+
+            <div class="action-grid">
+                <div class="action-card" onclick="startReport()">
+                    <div class="card-icon report-icon"><i data-lucide="plus-circle"></i></div>
+                    <h3>Nova Denúncia</h3>
+                    <p>Inicie um relato seguro em menos de 2 minutos.</p>
+                </div>
+                <div class="action-card" onclick="showView('tracking')">
+                    <div class="card-icon track-icon"><i data-lucide="search"></i></div>
+                    <h3>Consultar Status</h3>
+                    <p>Verifique o andamento usando seu código de protocolo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORT VIEW -->
+        <section id="view-report" class="view fade-in">
+            <div class="card-form">
+                <div class="stepper">
+                    <span id="step-label" style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Etapa 1: Categoria</span>
+                    <div class="step-dot-container">
+                        <div class="step-dot active" id="dot-1"></div>
+                        <div class="step-dot" id="dot-2"></div>
+                        <div class="step-dot" id="dot-3"></div>
+                        <div class="step-dot" id="dot-4"></div>
+                    </div>
+                </div>
+
+                <div class="step-content">
+                    <!-- Step 1: Categoria Principal -->
+                    <div class="step active" id="step-1">
+                        <h2><i data-lucide="layers" style="color: var(--primary)"></i> Selecione a Categoria</h2>
+                        <div class="selection-grid" id="main-category-list"></div>
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="showView('home')">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Subcategoria -->
+                    <div class="step" id="step-2">
+                        <h2><i data-lucide="list-tree" style="color: var(--primary)"></i> Qual o assunto específico?</h2>
+                        <div class="selection-grid" id="subcategory-list"></div>
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="goToStep(1)">Voltar</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Localização -->
+                    <div class="step" id="step-3">
+                        <h2><i data-lucide="map-pin" style="color: var(--primary)"></i> Onde aconteceu?</h2>
+                        <div class="input-group">
+                            <label>CEP (Opcional)</label>
+                            <div class="cep-row">
+                                <input type="text" id="input-cep" placeholder="00000-000" maxlength="9">
+                                <button class="btn-search-cep" onclick="simulateCepSearch()"><i data-lucide="search" size="18"></i></button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Bairro *</label>
+                            <input type="text" id="input-bairro" placeholder="Ex: Centro" oninput="validateLocation()">
+                        </div>
+                        <div class="input-group">
+                            <label>Rua / Logradouro *</label>
+                            <input type="text" id="input-rua" placeholder="Ex: Rua das Flores, 123" oninput="validateLocation()">
+                        </div>
+                        <div class="input-group">
+                            <label>Ponto de Referência</label>
+                            <textarea id="input-ref" rows="2" placeholder="Ex: Próximo ao hospital..."></textarea>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="goToStep(2)">Voltar</button>
+                            <button class="btn btn-primary" id="btn-loc-next" disabled onclick="goToStep(4)">Continuar <i data-lucide="arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Evidências -->
+                    <div class="step" id="step-4">
+                        <h2><i data-lucide="paperclip" style="color: var(--primary)"></i> Anexar Evidências</h2>
+                        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                            <i data-lucide="upload-cloud" size="40" style="color: var(--text-muted); margin-bottom: 15px;"></i>
+                            <p style="font-weight: 600;">Clique para enviar arquivos</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Fotos, vídeos ou documentos (Opcional)</p>
+                            <input type="file" id="file-input" style="display:none" multiple onchange="updateFileStatus()">
+                        </div>
+                        <div id="file-status" style="margin-top: 15px; font-size: 0.85rem; color: var(--accent-green); text-align: center;"></div>
+                        
+                        <div class="btn-row">
+                            <button class="btn btn-secondary" onclick="goToStep(3)">Voltar</button>
+                            <button class="btn btn-primary" onclick="submitFinal()">Enviar Denúncia <i data-lucide="check"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Sucesso -->
+                    <div class="step" id="step-success" style="text-align: center;">
+                        <div style="background: rgba(34, 197, 94, 0.1); color: var(--accent-green); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
+                            <i data-lucide="shield-check" size="36"></i>
+                        </div>
+                        <h2>Denúncia Registrada</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Sua identidade foi preservada. Anote seu protocolo:</p>
+                        <div class="protocol-display">
+                            <span class="protocol-code" id="res-protocol">---</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="location.reload()">Voltar para Início</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRACKING VIEW -->
+        <section id="view-tracking" class="view fade-in">
+            <div class="card-form" style="padding: 40px;">
+                <h2>Acompanhar Ocorrência</h2>
+                <div class="input-group">
+                    <label>Número do Protocolo</label>
+                    <input type="text" id="track-input" placeholder="PROT-XXXXXXXX" style="font-family: monospace; font-size: 1.2rem; text-transform: uppercase;">
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="trackProtocol()">Consultar <i data-lucide="arrow-right"></i></button>
+
+                <div id="track-result" style="display:none; margin-top: 40px;" class="fade-in">
+                    <div style="border-top: 1px solid var(--border); padding-top: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h3 id="track-id" style="font-family: monospace; color: var(--primary);"></h3>
+                            <span style="background: var(--bg-input); padding: 5px 12px; border-radius: 50px; font-size: 0.7rem; border: 1px solid var(--border);">EM ANÁLISE</span>
+                        </div>
+                        <div class="status-timeline">
+                            <div class="status-item completed">
+                                <div class="status-circle"><i data-lucide="check" size="14"></i></div>
+                                <span class="status-label">Recebida</span>
+                            </div>
+                            <div class="status-item active">
+                                <div class="status-circle"><i data-lucide="clock" size="14"></i></div>
+                                <span class="status-label">Análise</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-circle"></div>
+                                <span class="status-label">Ação</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-circle"></div>
+                                <span class="status-label">Fim</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="margin-top: 20px; width: 100%;" onclick="showView('home')">Voltar</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="emergency-grid">
+                <div class="emergency-item">
+                    <span class="emergency-num">180</span>
+                    <span class="emergency-label">Mulher</span>
+                </div>
+                <div class="emergency-item">
+                    <span class="emergency-num">190</span>
+                    <span class="emergency-label">Polícia</span>
+                </div>
+                <div class="emergency-item">
+                    <span class="emergency-num">192</span>
+                    <span class="emergency-label">SAMU</span>
+                </div>
+                <div class="emergency-item">
+                    <span class="emergency-num">100</span>
+                    <span class="emergency-label">Dir. Humanos</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Ambiente seguro com criptografia militar. Não armazenamos cookies ou logs de navegação.</p>
+                <p style="margin-top: 10px;">&copy; 2024 CidadãoSeguro Brasil</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
